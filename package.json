@@ -1,0 +1,41 @@
+{
+  "name": "apostrophe-monitor",
+  "version": "2.0.0",
+  "description": "Automatically restart Apostrophe 2.x sites. Like nodemon, but faster because it is optimized for Apostrophe.",
+  "main": "monitor.js",
+  "dependencies": {
+    "chokidar": "^2.0.4",
+    "clear-require": "^2.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^4.15.0",
+    "eslint-config-punkave": "^1.0.10",
+    "eslint-config-standard": "^11.0.0-beta.0",
+    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-node": "^5.2.1",
+    "eslint-plugin-promise": "^3.6.0",
+    "eslint-plugin-standard": "^3.0.1",
+    "mocha": "^5.1.1"
+  },
+  "bin": {
+    "monitor": "./bin/monitor"
+  },
+  "scripts": {
+    "test": "eslint ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/punkave/apostrophe-monitor.git"
+  },
+  "keywords": [
+    "apostrophe",
+    "apostrophecms",
+    "nodemon"
+  ],
+  "author": "P'unk Avenue LLC",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/punkave/apostrophe-monitor/issues"
+  },
+  "homepage": "https://github.com/punkave/apostrophe-monitor#readme"
+}
