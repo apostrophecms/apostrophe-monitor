@@ -20,24 +20,23 @@ module.exports = require('apostrophe')({
 });
 ```
 
-```
-# Now launch the site with monitoring.
-# Yes, the "x" is correct
-npx monitor
-```
-
-Your site starts up. Now change a file like `app.js` or `lib/modules/apostrophe-pages/index.js` or even `lib/modules/apostrophe-pages/views/pages/home.html`. When you save the change in your editor, your site automatically restarts.
-
-## Running it with `npm run`
-
-You can also use `npm run` if you wish. In your `package.json`:
+Next, add a command to the `scripts` section of your `package.json` so you can run the monitor:
 
 ```
   "scripts": {
-    "start": "node app.js",
     "monitor": "monitor"
-  }
+  },
 ```
+
+Now you can launch your site with monitoring!
+
+```
+npm run monitor
+```
+
+Your site starts up. Now change a file like `app.js` or `lib/modules/apostrophe-pages/index.js` or even `lib/modules/apostrophe-pages/views/pages/home.html`.
+
+When you save the change in your editor, your site automatically restarts.
 
 ## Configuration options
 
