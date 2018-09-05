@@ -55,9 +55,16 @@ function start() {
     console.error('Restarting in response to changes...');
   }
   apos = require(from);
-  if (!apos) {
+  // Does this smell like an apos object, or more like the default
+  // empty exports object of an app.js that doesn't export anything?
+  if ((!apos) || (!apos.synth)) {
     console.error('Your app.js does not export the apos object.');
-    console.error('You need: module.exports = require(\'apostrophe\'){ ... }');
+    youNeed();
+    process.exit(1);
+  }
+  if (!apos.options.root) {
+    console.error('You did not pass root to the apos object.');
+    youNeed();
     process.exit(1);
   }
   apos.options.afterListen = function(err) {
@@ -108,3 +115,10 @@ function restart() {
 
 start();
 
+function youNeed() {
+  console.error('\nYou need:\n');
+  console.error('module.exports = require(\'apostrophe\') {');
+  console.error('  root: module');
+  console.error('  // the rest of your configuration follows as usual');
+  console.error('};');
+}
