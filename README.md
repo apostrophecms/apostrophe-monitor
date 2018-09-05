@@ -30,11 +30,11 @@ Now you can launch your site with monitoring!
 npm run monitor
 ```
 
-> This is the command you'll run forevermore when you're ready to start your site in development. **Leave it running**, it will **automatically** restart as you save changes to your code.
-
 Your site starts up. Now change a file like `app.js` or `lib/modules/apostrophe-pages/index.js` or even `lib/modules/apostrophe-pages/views/pages/home.html`.
 
 When you save the change in your editor, your site automatically restarts.
+
+> This is the command you'll run forevermore when you're ready to start your site in development. **Leave it running**, it will **automatically** restart as you save changes to your code.
 
 ## Configuration options
 
