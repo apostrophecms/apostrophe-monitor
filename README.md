@@ -2,13 +2,9 @@ A monitor to automatically restart Apostrophe when you make changes to your code
 
 ## Installation
 
-It's still in beta, so type this in your project folder to install it from github:
-
 ```
-npm install apostrophecms/apostrophe-monitor
+npm install apostrophe-monitor
 ```
-
-Later you will just `npm install apostrophe-monitor`.
 
 ```
 // Next, in your app.js file:
@@ -33,6 +29,8 @@ Now you can launch your site with monitoring!
 ```
 npm run monitor
 ```
+
+> This is the command you'll run forevermore when you're ready to start your site in development. **Leave it running**, it will **automatically** restart as you save changes to your code.
 
 Your site starts up. Now change a file like `app.js` or `lib/modules/apostrophe-pages/index.js` or even `lib/modules/apostrophe-pages/views/pages/home.html`.
 
