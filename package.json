@@ -1,6 +1,6 @@
 {
   "name": "apostrophe-monitor",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Automatically restart Apostrophe 2.x sites. Like nodemon, but faster because it is optimized for Apostrophe.",
   "main": "monitor.js",
   "dependencies": {

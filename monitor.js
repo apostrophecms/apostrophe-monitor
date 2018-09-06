@@ -81,9 +81,8 @@ function change(event, filename) {
     return;
   }
   if (filename === module.filename) {
-    // We CAN restart app.js, but we can't restart monitor.js
-    console.error('Cannot self-restart "monitor.js" itself. Start again manually.');
-    process.exit(1);
+    // monitor.js can't monitor itself, nor will it change in normal use anyway
+    return;
   }
   clear(filename);
   if (!restartable) {
