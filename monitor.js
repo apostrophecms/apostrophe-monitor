@@ -25,6 +25,7 @@ try {
   }
 }
 
+appDir = correctSlashes(appDir);
 console.log('Watching ' + appDir);
 
 let ignore = [
@@ -40,6 +41,8 @@ if (fs.existsSync(appDir + '/monitor-config.js')) {
   config = require(appDir + '/monitor-config.js');
   ignore = ignore.concat(config.addIgnore || []);
 }
+
+ignore = ignore.map(rule => correctSlashes(rule));
 
 let seen = {};
 
@@ -113,6 +116,10 @@ function restart() {
 }
 
 start();
+
+function correctSlashes(s) {
+  return s.replace(/\//g, require('path').sep);  
+}
 
 function youNeed() {
   console.error('\nYou need:\n');
