@@ -6,7 +6,8 @@
   "dependencies": {
     "anymatch": "^2.0.0",
     "chokidar": "^2.0.4",
-    "clear-require": "^2.0.0"
+    "clear-require": "^2.0.0",
+    "regexp-quote": "0.0.0"
   },
   "devDependencies": {
     "eslint": "^4.15.0",

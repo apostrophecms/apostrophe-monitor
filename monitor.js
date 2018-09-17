@@ -2,6 +2,7 @@ const chokidar = require('chokidar');
 const clear = require('clear-require');
 const fs = require('fs');
 const anymatch = require('anymatch');
+const quote = require('regexp-quote');
 let restartable = false;
 let timeout = null;
 
@@ -127,7 +128,7 @@ function restart() {
 start();
 
 function unixSlashes(s) {
-  return s.replace(new RegExp(require('path').sep, 'g'), '/');
+  return s.replace(new RegExp(quote(require('path').sep), 'g'), '/');
 }
 
 function youNeed() {
