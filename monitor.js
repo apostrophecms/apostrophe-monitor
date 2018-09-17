@@ -1,6 +1,7 @@
 const chokidar = require('chokidar');
 const clear = require('clear-require');
 const fs = require('fs');
+const anymatch = require('anymatch');
 let restartable = false;
 let timeout = null;
 
@@ -25,7 +26,7 @@ try {
   }
 }
 
-appDir = correctSlashes(appDir);
+appDir = unixSlashes(appDir);
 console.log('Watching ' + appDir);
 
 let ignore = [
@@ -42,12 +43,18 @@ if (fs.existsSync(appDir + '/monitor-config.js')) {
   ignore = ignore.concat(config.addIgnore || []);
 }
 
-ignore = ignore.map(rule => correctSlashes(rule));
+ignore = ignore.map(rule => unixSlashes(rule));
 
 let seen = {};
 
 chokidar.watch([ appDir ], {
-  ignored: ignore
+  ignored: function(path) {
+    // We're seeing paths appear both ways, Unix and non-, on Windows
+    // for each call and one always is not ignored. Normalize to Unix
+    path = unixSlashes(path);
+    // Same module otherwise used by chokidar
+    return anymatch(ignore, path);
+  }
 }).on('all', change);
 
 let apos = null;
@@ -76,7 +83,7 @@ function start() {
     }
     console.error('Waiting for changes...');
     restartable = true;
-  }
+  };
 }
 
 function change(event, filename) {
@@ -88,6 +95,8 @@ function change(event, filename) {
     return;
   }
   clear(filename);
+  // otherwise we keep getting the same apos object back
+  clear(from);
   if (!restartable) {
     if (!timeout) {
       timeout = setTimeout(function() {
@@ -117,8 +126,8 @@ function restart() {
 
 start();
 
-function correctSlashes(s) {
-  return s.replace(/\//g, require('path').sep);  
+function unixSlashes(s) {
+  return s.replace(new RegExp(require('path').sep, 'g'), '/');
 }
 
 function youNeed() {
