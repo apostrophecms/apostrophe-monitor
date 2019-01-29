@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.0.3
+
+* This module no longer crashes after 2-3 restarts thanks to changes in `moog-require`. This is not a change in this module, but it is fundamental to making it work properly, so make sure you `npm update` your app.
+* Optional profiling with the `--profile-monitor` option, which you can enable via a second `script` in `package.json` that passes it. The profiling output simply displays how long it takes to restart the app on each pass.
+
 ## 2.0.2
 
 * Bug fix: most changes to files other than `app.js` did not fully trigger a restart of Apostrophe. This has been corrected.
