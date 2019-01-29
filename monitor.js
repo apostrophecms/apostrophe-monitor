@@ -3,10 +3,11 @@ const clear = require('clear-require');
 const fs = require('fs');
 const anymatch = require('anymatch');
 const quote = require('regexp-quote');
+
 let restartable = false;
 let timeout = null;
 
-let appDir, entry, from;
+let appDir, entry, from, db;
 try {
   appDir = process.cwd();
   entry = require(appDir + '/package.json').main;
@@ -61,7 +62,7 @@ chokidar.watch([ appDir ], {
 let apos = null;
 
 function start() {
-  const now = Date.now();
+  const start = Date.now();
   if (apos) {
     console.error('Restarting in response to changes...');
   }
@@ -81,6 +82,10 @@ function start() {
   apos.options.afterListen = function(err) {
     if (err) {
       console.error(err);
+    }
+    const end = Date.now();
+    if (apos.argv['profile-monitor']) {
+      console.log('Startup time: ' + (end - start) + 'ms');
     }
     console.error('Waiting for changes...');
     restartable = true;
