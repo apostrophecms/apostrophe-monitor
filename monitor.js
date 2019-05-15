@@ -43,6 +43,7 @@ let config;
 if (fs.existsSync(appDir + '/monitor-config.js')) {
   config = require(appDir + '/monitor-config.js');
   ignore = ignore.concat(config.addIgnore || []);
+  on = config.on;
 }
 
 ignore = ignore.map(rule => unixSlashes(rule));
@@ -107,6 +108,8 @@ function change(event, filename) {
     if (!timeout) {
       timeout = setTimeout(function() {
         timeout = null;
+        // bind it to monitor-config.js on chokidar event
+        on(event, filename, apos);
         return change(filename);
       }, 100);
     }
