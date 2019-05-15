@@ -109,7 +109,9 @@ function change(event, filename) {
       timeout = setTimeout(function() {
         timeout = null;
         // bind it to monitor-config.js on chokidar event
-        on(event, filename, apos);
+        if (on){
+          on(event, filename, apos);
+        }
         return change(filename);
       }, 100);
     }
