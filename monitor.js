@@ -34,7 +34,6 @@ console.log('Watching ' + appDir);
 
 let ignore = [
   appDir + '/lib/modules/*/public/**',
-  appDir + '/lib/modules/*/views/**',
   appDir + '/node_modules/**',
   appDir + '/public/modules/**',
   appDir + '/public/uploads/**',
@@ -81,10 +80,6 @@ function start() {
     console.error('You did not pass root to the apos object.');
     youNeed();
     process.exit(1);
-  }
-  var templateOptions = apos.options.modules ? apos.options.modules['apostrophe-templates'] : {};
-  if (templateOptions.viewsFolderFallback) {
-    ignore.push(path.join(templateOptions.viewsFolderFallback, '**'));
   }
   apos.options.afterListen = function(err) {
     if (err) {
