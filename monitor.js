@@ -7,7 +7,7 @@ const quote = require('regexp-quote');
 let restartable = false;
 let timeout = null;
 
-let appDir, entry, from, db;
+let appDir, entry, from;
 try {
   appDir = process.cwd();
   entry = require(appDir + '/package.json').main;
@@ -17,7 +17,7 @@ try {
   if (entry) {
     console.error(e);
     if (!entry.match(/\.\w+$/)) {
-      // Intentionally add this late, for 
+      // Intentionally add this late, for
       entry += '.js';
     }
     console.error('Unable to find app.js at ' + entry + '.');
@@ -46,8 +46,6 @@ if (fs.existsSync(appDir + '/monitor-config.js')) {
 }
 
 ignore = ignore.map(rule => unixSlashes(rule));
-
-let seen = {};
 
 chokidar.watch([ appDir ], {
   ignored: function(path) {
