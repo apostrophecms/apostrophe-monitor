@@ -1,6 +1,7 @@
 const chokidar = require('chokidar');
 const clear = require('clear-require');
 const fs = require('fs');
+const path = require('path');
 const anymatch = require('anymatch');
 const quote = require('regexp-quote');
 
@@ -12,7 +13,7 @@ try {
   appDir = process.cwd();
   entry = require(appDir + '/package.json').main;
   from = appDir + '/' + entry;
-  appDir = require('path').dirname(from);
+  appDir = path.dirname(from);
 } catch (e) {
   if (entry) {
     console.error(e);
@@ -32,6 +33,8 @@ appDir = unixSlashes(appDir);
 console.log('Watching ' + appDir);
 
 let ignore = [
+  appDir + '/lib/modules/*/public/**',
+  appDir + '/lib/modules/*/views/**',
   appDir + '/node_modules/**',
   appDir + '/public/modules/**',
   appDir + '/public/uploads/**',
@@ -78,6 +81,10 @@ function start() {
     console.error('You did not pass root to the apos object.');
     youNeed();
     process.exit(1);
+  }
+  var templateOptions = apos.options.modules ? apos.options.modules['apostrophe-templates'] : {};
+  if (templateOptions.viewsFolderFallback) {
+    ignore.push(path.join(templateOptions.viewsFolderFallback, '**'));
   }
   apos.options.afterListen = function(err) {
     if (err) {
@@ -133,7 +140,7 @@ function restart() {
 start();
 
 function unixSlashes(s) {
-  return s.replace(new RegExp(quote(require('path').sep), 'g'), '/');
+  return s.replace(new RegExp(quote(path.sep), 'g'), '/');
 }
 
 function youNeed() {
