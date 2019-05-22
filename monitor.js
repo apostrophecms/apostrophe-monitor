@@ -1,6 +1,7 @@
 const chokidar = require('chokidar');
 const clear = require('clear-require');
 const fs = require('fs');
+const path = require('path');
 const anymatch = require('anymatch');
 const quote = require('regexp-quote');
 
@@ -12,7 +13,7 @@ try {
   appDir = process.cwd();
   entry = require(appDir + '/package.json').main;
   from = appDir + '/' + entry;
-  appDir = require('path').dirname(from);
+  appDir = path.dirname(from);
 } catch (e) {
   if (entry) {
     console.error(e);
@@ -32,6 +33,7 @@ appDir = unixSlashes(appDir);
 console.log('Watching ' + appDir);
 
 let ignore = [
+  appDir + '/lib/modules/*/public/**',
   appDir + '/node_modules/**',
   appDir + '/public/modules/**',
   appDir + '/public/uploads/**',
@@ -131,7 +133,7 @@ function restart() {
 start();
 
 function unixSlashes(s) {
-  return s.replace(new RegExp(quote(require('path').sep), 'g'), '/');
+  return s.replace(new RegExp(quote(path.sep), 'g'), '/');
 }
 
 function youNeed() {
