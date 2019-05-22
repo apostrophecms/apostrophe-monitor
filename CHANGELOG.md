@@ -1,8 +1,12 @@
 # Changelog
 
-## 2.0.4
+## 2.0.5
 
 * `editorconfig`, ignore more public js for fewer unnecessary restarts. Thanks to Frederik Ekelund.
+
+## 2.0.4
+
+* Packaging and documentation changes only.
 
 ## 2.0.3
 
