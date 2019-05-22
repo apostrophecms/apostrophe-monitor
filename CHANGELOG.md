@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.4
+
+* `editorconfig`, ignore more public js for fewer unnecessary restarts. Thanks to Frederik Ekelund.
+
 ## 2.0.3
 
 * This module no longer crashes after 2-3 restarts thanks to changes in `moog-require`. This is not a change in this module, but it is fundamental to making it work properly, so make sure you `npm update` your app.
