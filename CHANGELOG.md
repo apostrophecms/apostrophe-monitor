@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.6
+
+* prefix addIgnore option to ignore absolute paths
+
 ## 2.0.5
 
 * `editorconfig`, ignore more public js for fewer unnecessary restarts. Thanks to Frederik Ekelund.
