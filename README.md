@@ -41,11 +41,11 @@ When you save the change in your editor, your site automatically restarts.
 ```
 // In monitor-config.js in the root of your project
 module.exports = {
-  addIgnore: [ data/some-dynamic-content-here/** ]
+  addIgnore: [ '/data/some-dynamic-content-here/**' ]
 }
 ```
 
-`addIgnore` should be an array of [anymatch](https://npmjs.org/package/anymatch)-compatible patterns.
+`addIgnore` should be an array of [anymatch](https://npmjs.org/package/anymatch)-compatible patterns starting with a `/`.
 
 `apostrophe-monitor` always ignores:
 
@@ -90,7 +90,7 @@ module.exports = {
   	self.on('apostrophe:destroy', 'closeConnection', function() {
   	  return self.conn.close();
 	});
-  }  
+  }
 }
 ```
 

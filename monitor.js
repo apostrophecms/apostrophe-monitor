@@ -33,13 +33,13 @@ appDir = unixSlashes(appDir);
 console.log('Watching ' + appDir);
 
 let ignore = [
-  appDir + '/lib/modules/*/public/**',
-  appDir + '/node_modules/**',
-  appDir + '/public/modules/**',
-  appDir + '/public/uploads/**',
-  appDir + '/public/css/master-*',
-  appDir + '/locales/**',
-  appDir + '/data/temp/**'
+  '/lib/modules/*/public/**',
+  '/node_modules/**',
+  '/public/modules/**',
+  '/public/uploads/**',
+  '/public/css/master-*',
+  '/locales/**',
+  '/data/temp/**'
 ];
 let config;
 if (fs.existsSync(appDir + '/monitor-config.js')) {
@@ -47,7 +47,7 @@ if (fs.existsSync(appDir + '/monitor-config.js')) {
   ignore = ignore.concat(config.addIgnore || []);
 }
 
-ignore = ignore.map(rule => unixSlashes(rule));
+ignore = ignore.map(rule => appDir + unixSlashes(rule));
 
 chokidar.watch([ appDir ], {
   ignored: function(path) {
