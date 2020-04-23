@@ -7,6 +7,7 @@ const quote = require('regexp-quote');
 
 let restartable = false;
 let timeout = null;
+let errorWarned = null;
 
 let appDir, entry, from;
 try {
@@ -49,8 +50,8 @@ if (fs.existsSync(appDir + '/monitor-config.js')) {
 
 ignore = ignore.map(rule => appDir + unixSlashes(rule));
 
-chokidar.watch([ appDir ], {
-  ignored: function(path) {
+chokidar.watch([appDir], {
+  ignored: function (path) {
     // We're seeing paths appear both ways, Unix and non-, on Windows
     // for each call and one always is not ignored. Normalize to Unix
     path = unixSlashes(path);
@@ -62,34 +63,48 @@ chokidar.watch([ appDir ], {
 let apos = null;
 
 function start() {
-  const start = Date.now();
-  if (apos) {
-    console.error('Restarting in response to changes...');
-  }
-  apos = require(from);
-  // Does this smell like an apos object, or more like the default
-  // empty exports object of an app.js that doesn't export anything?
-  if ((!apos) || (!apos.synth)) {
-    console.error('Your app.js does not export the apos object.');
-    youNeed();
-    process.exit(1);
-  }
-  if (!apos.options.root) {
-    console.error('You did not pass root to the apos object.');
-    youNeed();
-    process.exit(1);
-  }
-  apos.options.afterListen = function(err) {
-    if (err) {
-      console.error(err);
+  try {
+    const start = Date.now();
+    if (apos && !errorWarned) {
+      console.error('Restarting in response to changes...');
     }
-    const end = Date.now();
-    if (apos.argv['profile-monitor']) {
-      console.log('Startup time: ' + (end - start) + 'ms');
+    apos = require(from);
+    // Does this smell like an apos object, or more like the default
+    // empty exports object of an app.js that doesn't export anything?
+    if ((!apos) || (!apos.synth)) {
+      console.error('Your app.js does not export the apos object.');
+      youNeed();
+      process.exit(1);
     }
-    console.error('Waiting for changes...');
-    restartable = true;
-  };
+    if (!apos.options.root) {
+      console.error('You did not pass root to the apos object.');
+      youNeed();
+      process.exit(1);
+    }
+    apos.options.afterListen = function (err) {
+      if (err) {
+        console.error(err);
+      }
+      const end = Date.now();
+      if (apos.argv['profile-monitor']) {
+        console.log('Startup time: ' + (end - start) + 'ms');
+      }
+      console.error('Waiting for changes...');
+      restartable = true;
+      errorWarned = null;
+    };
+  } catch (e) {
+    if (!errorWarned) {
+      console.error('An error occurred when restarting: ', e);
+      errorWarned = true;
+    }
+    if (!timeout) {
+      timeout = setTimeout(function () {
+        timeout = null;
+        return start();
+      }, 100);
+    }
+  }
 }
 
 function change(event, filename) {
@@ -105,7 +120,7 @@ function change(event, filename) {
   clear(from);
   if (!restartable) {
     if (!timeout) {
-      timeout = setTimeout(function() {
+      timeout = setTimeout(function () {
         timeout = null;
         return change(filename);
       }, 100);
@@ -121,7 +136,7 @@ function change(event, filename) {
 
 function restart() {
   restartable = false;
-  return apos.destroy(function(err) {
+  return apos.destroy(function (err) {
     if (err) {
       console.error(err);
       process.exit(1);
