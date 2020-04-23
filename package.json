@@ -9,7 +9,8 @@
     "clear-require": "^2.0.0",
     "intercept-require": "^1.1.0",
     "node-hook": "^1.0.0",
-    "regexp-quote": "0.0.0"
+    "regexp-quote": "0.0.0",
+    "stoppable": "^1.1.0"
   },
   "devDependencies": {
     "eslint": "^5.16.0",

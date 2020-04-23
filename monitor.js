@@ -5,6 +5,7 @@ const path = require('path');
 const anymatch = require('anymatch');
 const quote = require('regexp-quote');
 const http = require('http');
+const stoppable = require('stoppable');
 
 let restartable = false;
 let timeout = null;
@@ -79,6 +80,13 @@ const errorHandlingServer = http.createServer(function (req, res) {
   res.end();
 });
 
+// 0 kills immediately, freeing up the port at the expense of
+// active connections. Shouldn't matter, as allowing new clients
+// to connect to a working application is higher priority than 
+// sending an error message to old clients for something already 
+// fixed
+stoppable(errorHandlingServer, 0);
+
 function start() {
   try {
     const start = Date.now();
@@ -100,8 +108,17 @@ function start() {
     }
 
     apos.options.afterInit = function (cb) {
-      errorHandlingServer.close();
-      cb();
+      if (errorHandlingServer.listening) {
+        errorHandlingServer.stop((err) => {
+          if (err) {
+            console.error('Could not stop error handling server.');
+            process.exit(1);
+          }
+          cb();
+        })
+      } else {
+        cb();
+      }
     }
 
     apos.options.afterListen = function (err) {
@@ -121,7 +138,7 @@ function start() {
       };
     };
   } catch (e) {
-    // If it's a new error, fire up our error handline server
+    // If it's a new error, fire up our error handling server
     // and log the error details
     if (!error.warned) {
       errorHandlingServer.listen(process.env.PORT || 3000)
