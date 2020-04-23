@@ -67,7 +67,7 @@ chokidar.watch([appDir], {
 
 let apos = null;
 
-const errorHandingServer = http.createServer(function (req, res) {
+const errorHandlingServer = http.createServer(function (req, res) {
   res.writeHead(500, {'Content-Type': 'text/html'});
   res.write(`<body><h1>You have a code error</h1>
   <strong>${error.message}</strong><br />
@@ -96,7 +96,7 @@ function start() {
     }
 
     apos.options.afterInit = function (cb) {
-      errorHandingServer.close();
+      errorHandlingServer.close();
       cb();
     }
 
@@ -120,7 +120,7 @@ function start() {
     // If it's a new error, fire up our error handline server
     // and log the error details
     if (!error.warned) {
-      errorHandingServer.listen(3000)
+      errorHandlingServer.listen(3000 || process.env.PORT)
       console.error('An error occurred when restarting: ', e.message, e.stack);
       error = {
         message: e.message,
