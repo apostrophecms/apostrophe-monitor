@@ -4,10 +4,15 @@ const fs = require('fs');
 const path = require('path');
 const anymatch = require('anymatch');
 const quote = require('regexp-quote');
+const http = require('http');
 
 let restartable = false;
 let timeout = null;
-let errorWarned = null;
+let error = {
+  warned: false,
+  message: null,
+  stack: null
+};
 
 let appDir, entry, from;
 try {
@@ -62,10 +67,18 @@ chokidar.watch([appDir], {
 
 let apos = null;
 
+const errorHandingServer = http.createServer(function (req, res) {
+  res.writeHead(500, {'Content-Type': 'text/html'});
+  res.write(`<body><h1>You have a code error</h1>
+  <strong>${error.message}</strong><br />
+  ${error.stack.split('<br />')}</body>`);
+  res.end();
+});
+
 function start() {
   try {
     const start = Date.now();
-    if (apos && !errorWarned) {
+    if (apos && !error.warned) {
       console.error('Restarting in response to changes...');
     }
     apos = require(from);
@@ -81,6 +94,12 @@ function start() {
       youNeed();
       process.exit(1);
     }
+
+    apos.options.afterInit = function (cb) {
+      errorHandingServer.close();
+      cb();
+    }
+
     apos.options.afterListen = function (err) {
       if (err) {
         console.error(err);
@@ -91,12 +110,23 @@ function start() {
       }
       console.error('Waiting for changes...');
       restartable = true;
-      errorWarned = null;
+      error = {
+        message: null,
+        stack: null,
+        warned: null
+      };
     };
   } catch (e) {
-    if (!errorWarned) {
-      console.error('An error occurred when restarting: ', e);
-      errorWarned = true;
+    // If it's a new error, fire up our error handline server
+    // and log the error details
+    if (!error.warned) {
+      errorHandingServer.listen(3000)
+      console.error('An error occurred when restarting: ', e.message, e.stack);
+      error = {
+        message: e.message,
+        stack: e.stack,
+        warned: true
+      }
     }
     if (!timeout) {
       timeout = setTimeout(function () {
