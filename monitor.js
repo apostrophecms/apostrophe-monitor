@@ -69,9 +69,13 @@ let apos = null;
 
 const errorHandlingServer = http.createServer(function (req, res) {
   res.writeHead(500, {'Content-Type': 'text/html'});
-  res.write(`<body><h1>You have a code error</h1>
-  <strong>${error.message}</strong><br />
-  ${error.stack.split('<br />')}</body>`);
+  res.write(`<body>
+  <h1>You have a code error</h1>
+    <strong>${error.message}</strong><br />
+    <code>
+    ${escapeHtml(error.stack).replace('\n', '<br />')}
+    </code>
+  </body>`);
   res.end();
 });
 
@@ -120,7 +124,7 @@ function start() {
     // If it's a new error, fire up our error handline server
     // and log the error details
     if (!error.warned) {
-      errorHandlingServer.listen(3000 || process.env.PORT)
+      errorHandlingServer.listen(process.env.PORT || 3000)
       console.error('An error occurred when restarting: ', e.message, e.stack);
       error = {
         message: e.message,
@@ -187,4 +191,14 @@ function youNeed() {
   console.error('  root: module');
   console.error('  // the rest of your configuration follows as usual');
   console.error('};');
+}
+
+// https://stackoverflow.com/questions/1787322/htmlspecialchars-equivalent-in-javascript
+function escapeHtml(text) {
+  return text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
 }
