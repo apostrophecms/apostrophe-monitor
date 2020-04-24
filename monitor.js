@@ -4,9 +4,16 @@ const fs = require('fs');
 const path = require('path');
 const anymatch = require('anymatch');
 const quote = require('regexp-quote');
+const http = require('http');
+const stoppable = require('stoppable');
 
 let restartable = false;
 let timeout = null;
+let error = {
+  warned: false,
+  message: null,
+  stack: null
+};
 
 let appDir, entry, from;
 try {
@@ -49,8 +56,8 @@ if (fs.existsSync(appDir + '/monitor-config.js')) {
 
 ignore = ignore.map(rule => appDir + unixSlashes(rule));
 
-chokidar.watch([ appDir ], {
-  ignored: function(path) {
+chokidar.watch([appDir], {
+  ignored: function (path) {
     // We're seeing paths appear both ways, Unix and non-, on Windows
     // for each call and one always is not ignored. Normalize to Unix
     path = unixSlashes(path);
@@ -61,35 +68,94 @@ chokidar.watch([ appDir ], {
 
 let apos = null;
 
+const errorHandlingServer = http.createServer(function (req, res) {
+  res.writeHead(500, {'Content-Type': 'text/html'});
+  res.write(`<body>
+  <h1>You have a code error</h1>
+    <strong>${error.message}</strong><br />
+    <code>
+    ${escapeHtml(error.stack).replace('\n', '<br />')}
+    </code>
+  </body>`);
+  res.end();
+});
+
+// 0 kills immediately, freeing up the port at the expense of
+// active connections. Shouldn't matter, as allowing new clients
+// to connect to a working application is higher priority than 
+// sending an error message to old clients for something already 
+// fixed
+stoppable(errorHandlingServer, 0);
+
 function start() {
-  const start = Date.now();
-  if (apos) {
-    console.error('Restarting in response to changes...');
-  }
-  apos = require(from);
-  // Does this smell like an apos object, or more like the default
-  // empty exports object of an app.js that doesn't export anything?
-  if ((!apos) || (!apos.synth)) {
-    console.error('Your app.js does not export the apos object.');
-    youNeed();
-    process.exit(1);
-  }
-  if (!apos.options.root) {
-    console.error('You did not pass root to the apos object.');
-    youNeed();
-    process.exit(1);
-  }
-  apos.options.afterListen = function(err) {
-    if (err) {
-      console.error(err);
+  try {
+    const start = Date.now();
+    if (apos && !error.warned) {
+      console.error('Restarting in response to changes...');
     }
-    const end = Date.now();
-    if (apos.argv['profile-monitor']) {
-      console.log('Startup time: ' + (end - start) + 'ms');
+    apos = require(from);
+    // Does this smell like an apos object, or more like the default
+    // empty exports object of an app.js that doesn't export anything?
+    if ((!apos) || (!apos.synth)) {
+      console.error('Your app.js does not export the apos object.');
+      youNeed();
+      process.exit(1);
     }
-    console.error('Waiting for changes...');
-    restartable = true;
-  };
+    if (!apos.options.root) {
+      console.error('You did not pass root to the apos object.');
+      youNeed();
+      process.exit(1);
+    }
+
+    apos.options.afterInit = function (cb) {
+      if (errorHandlingServer.listening) {
+        errorHandlingServer.stop((err) => {
+          if (err) {
+            console.error('Could not stop error handling server.');
+            process.exit(1);
+          }
+          cb();
+        })
+      } else {
+        cb();
+      }
+    }
+
+    apos.options.afterListen = function (err) {
+      if (err) {
+        console.error(err);
+      }
+      const end = Date.now();
+      if (apos.argv['profile-monitor']) {
+        console.log('Startup time: ' + (end - start) + 'ms');
+      }
+      console.error('Waiting for changes...');
+      restartable = true;
+      error = {
+        message: null,
+        stack: null,
+        warned: null
+      };
+    };
+  } catch (e) {
+    // If it's a new error, fire up our error handling server
+    // and log the error details
+    if (!error.warned) {
+      errorHandlingServer.listen(process.env.PORT || 3000)
+      console.error('An error occurred when restarting: ', e.message, e.stack);
+      error = {
+        message: e.message,
+        stack: e.stack,
+        warned: true
+      }
+    }
+    if (!timeout) {
+      timeout = setTimeout(function () {
+        timeout = null;
+        return start();
+      }, 100);
+    }
+  }
 }
 
 function change(event, filename) {
@@ -105,7 +171,7 @@ function change(event, filename) {
   clear(from);
   if (!restartable) {
     if (!timeout) {
-      timeout = setTimeout(function() {
+      timeout = setTimeout(function () {
         timeout = null;
         return change(filename);
       }, 100);
@@ -121,7 +187,7 @@ function change(event, filename) {
 
 function restart() {
   restartable = false;
-  return apos.destroy(function(err) {
+  return apos.destroy(function (err) {
     if (err) {
       console.error(err);
       process.exit(1);
@@ -142,4 +208,14 @@ function youNeed() {
   console.error('  root: module');
   console.error('  // the rest of your configuration follows as usual');
   console.error('};');
+}
+
+// https://stackoverflow.com/questions/1787322/htmlspecialchars-equivalent-in-javascript
+function escapeHtml(text) {
+  return text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
 }
