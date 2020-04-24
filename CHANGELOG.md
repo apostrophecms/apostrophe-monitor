@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.0
+
+* Can now handle syntax errors in `app.js`. These result in a useful stack trace display in the web browser, and the monitor stays up to handle your next change. Thanks to Joe Innes.
+
 ## 2.0.6
 
 * prefix addIgnore option to ignore absolute paths
